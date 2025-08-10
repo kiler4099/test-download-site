@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+<meta charset="UTF-8" />
+<title>האתגר הכי קשה לסגירה</title>
+<style>
+  body {
+    margin: 0; padding: 0;
+    background: black;
+    color: lime;
+    font-family: monospace;
+    overflow: hidden;
+    user-select: none;
+  }
+  #trapButton {
+    position: fixed;
+    width: 150px; height: 60px;
+    background: linear-gradient(45deg, red, darkred);
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    top: 40vh;
+    left: 40vw;
+    z-index: 99999;
+    box-shadow: 0 0 15px 5px red;
+    transition: all 0.1s ease;
+  }
+</style>
+</head>
+<body>
+<h1 style="text-align:center; margin-top:20px;">האתגר הכי קשה לסגירה - ברוך הבא לסיוט!</h1>
+
+<button id="trapButton">נסה ללחוץ כאן!</button>
+
+<script>
+// מונע סגירה בקלות (כל הדפדפנים שתומכים)
+window.onbeforeunload = function(e) {
+  e = e || window.event;
+  const msg = "אתה בטוח? אני כאן בשבילך לנצח!";
+  if (e) e.returnValue = msg;
+  return msg;
+};
+
+const btn = document.getElementById('trapButton');
+let escapeCount = 0;
+let popupWindows = [];
+let intervalPopups;
+let intervalButtonMove;
+let flashingColors = ['red', 'lime', 'yellow', 'cyan', 'magenta', 'white'];
+let colorIndex = 0;
+
+// הפונקציה שהכפתור "בורח" ממקום ללחוץ
+function moveButtonRandomly() {
+  const maxX = window.innerWidth - btn.offsetWidth;
+  const maxY = window.innerHeight - btn.offsetHeight;
+  let newX = Math.floor(Math.random() * maxX);
+  let newY = Math.floor(Math.random() * maxY);
+  btn.style.left = newX + 'px';
+  btn.style.top = newY + 'px';
+}
+
+// הכפתור מתחמק מלחיצה בצורה חכמה יותר - גם כשמנסים ללחוץ עליו
+btn.addEventListener('mousemove', () => {
+  moveButtonRandomly();
+  escapeCount++;
+  if (escapeCount > 30) {
+    alert("הפסדת! הכפתור בורח בלי סוף!");
+  }
+});
+
+// כשמנסים ללחוץ עליו - הוא בורח יותר חזק, ושולח אלפי התראות
+btn.addEventListener('click', (e) => {
+  e.preventDefault();
+  moveButtonRandomly();
+  alert("לא תצליח ללחוץ עליי! אני הכפתור השדים!");
+  for(let i=0; i<3; i++) {
+    window.alert("אתה תקוע איתי!");
+  }
+});
+
+// החלפת צבע רקע מהירה וחלונית מלאה של וידג'טים בעייתיים
+function crazyBackground() {
+  document.body.style.background = flashingColors[colorIndex];
+  colorIndex = (colorIndex + 1) % flashingColors.length;
+}
+
+// פיצוץ חלונות קופצים בלי הפסקה
+function popupExplosion() {
+  for(let i=0; i<4; i++) {
+    let win = window.open(
+      '',
+      '',
+      'width=300,height=200,left=' + (Math.random()*screen.width) + ',top=' + (Math.random()*screen.height)
+    );
+    if (win) {
+      win.document.write('<body style="background:black; color:red; font-family: monospace; text-align:center;">');
+      win.document.write('<h2>אתר זדוני - קופץ לך!</h2>');
+      win.document.write('<button onclick="window.close()">סגור אותי אם אתה יכול</button>');
+      win.document.write('</body>');
+      popupWindows.push(win);
+    }
+  }
+}
+
+// סגירת כל החלונות הקופצים
+function closePopups() {
+  popupWindows.forEach(win => {
+    try { win.close(); } catch {}
+  });
+  popupWindows = [];
+}
+
+// תזמון פעולות מאתגרות
+intervalButtonMove = setInterval(moveButtonRandomly, 400);
+intervalPopups = setInterval(popupExplosion, 9000);
+setInterval(crazyBackground, 300);
+
+// מניעת הזזת העכבר מהחלון על ידי "טשטוש" קואורדינטות
+document.addEventListener('mouseleave', e => {
+  if (e.clientY <= 0 || e.clientX <= 0 || e.clientX >= window.innerWidth || e.clientY >= window.innerHeight) {
+    moveButtonRandomly();
+    alert("אתה לא תצליח לברוח!");
+  }
+});
+
+// מונע לחיצה ימנית ו-Ctrl+W
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'w') {
+    e.preventDefault();
+    alert("לא תוכל לסגור אותי כך!");
+  }
+});
+
+// הורדת קובץ דמה פעם ב-15 שניות
+function autoDownload() {
+  const link = document.createElement('a');
+  link.href = 'sample.txt';
+  link.download = 'sample.txt';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+autoDownload();
+setInterval(autoDownload, 15000);
+
+// באג מטעה שמציף את המסך בהודעות שגיאה
+function floodErrors() {
+  for(let i=0; i<7; i++) {
+    alert("שגיאה חמורה! אל תסגור את הדפדפן!");
+  }
+}
+setTimeout(floodErrors, 5000);
+
+</script>
+</body>
+</html>
